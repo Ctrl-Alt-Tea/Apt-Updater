@@ -1,71 +1,94 @@
-#!/bin/python3
+#!/usr/bin/env python3
 
 import subprocess
-import os, sys
+import os
+import sys
 
-PURPLE = '\033[95m'
-CYAN = '\033[96m'
-BLUE = '\033[94m'
-GREEN = '\033[92m'
-YELLOW = '\033[93m'
-UNDERLINE = '\033[4m'
-ORANGE = '\033[33m'
-GREY = '\033[90m'
-RESET = '\033[0;0m'  # Reset terminal color scheme
+# ──────────────────────────────────────────────
+# Color Definitions
+# ──────────────────────────────────────────────
+COLORS = {
+    "PURPLE": "\033[95m",
+    "CYAN": "\033[96m",
+    "BLUE": "\033[94m",
+    "GREEN": "\033[92m",
+    "YELLOW": "\033[93m",
+    "ORANGE": "\033[33m",
+    "GREY": "\033[90m",
+    "RESET": "\033[0m",
+}
 
-def run_update(command):
+# ──────────────────────────────────────────────
+# Run apt command and stream output live
+# ──────────────────────────────────────────────
+def run_update(command: list[str]):
     try:
         process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+
         for line in process.stdout:
-            print(line, end='')  # Print each line as it is received
-        process.wait()  # Wait for the process to complete
+            print(line, end="")
+
+        process.wait()
         if process.returncode != 0:
-            print(f"An error occurred: {process.stderr.read()}")
+            print(f"{COLORS['ORANGE']}Error:{COLORS['RESET']} {process.stderr.read()}")
+
+        return process.returncode
+
     except Exception as e:
-        print(f"An unexpected error occurred: {e}")
+        print(f"{COLORS['ORANGE']}Unexpected error:{COLORS['RESET']} {e}")
+        return 1
 
+# ──────────────────────────────────────────────
+# Menu UI
+# ──────────────────────────────────────────────
 def display_menu():
-    print("Select an Apt option below to update your system:")
-    print(f'{GREEN}1. Update packages and sources')
-    print("2. Upgrade packages")
-    print("3. Remove uneeded dependancies")
-    print(f'{GREY}4. Exit{RESET}')
-    print(f'{ORANGE}5. Exit and clear terminal{RESET}')
+    print("Select an APT option below:")
+    print(f"{COLORS['GREEN']}1. Update package lists")
+    print("2. Upgrade installed packages")
+    print("3. Remove unused dependencies")
+    print(f"{COLORS['GREY']}4. Exit")
+    print(f"{COLORS['ORANGE']}5. Exit and clear terminal{COLORS['RESET']}")
 
-def get_scan_options(choice):
-    if choice == 1:
-        return ['sudo', 'apt', 'update', '-y']
-    elif choice == 2:
-        return ['sudo', 'apt', 'upgrade', '-y']
-    elif choice == 3:
-        return ['sudo', 'apt', 'autoremove', '-y']
-    elif choice == 4:
-        print("Exiting...")
-        exit()
-    elif choice == 5:
-        os.system('clear')   # Clear terminal
-        sys.exit()
-    else:
-        print("Invalid choice. Please try again.")
-        return None
+def get_scan_options(choice: int):
+    return {
+        1: ["sudo", "apt", "update", "-y"],
+        2: ["sudo", "apt", "upgrade", "-y"],
+        3: ["sudo", "apt", "autoremove", "-y"],
+        4: None,
+        5: None,
+    }.get(choice)
 
+# ──────────────────────────────────────────────
+# Main loop
+# ──────────────────────────────────────────────
 def main():
+    url = "https://github.com/Ctrl-Alt-Tea"
+
     while True:
-        url = "https://github.com/Ctrl-Alt-Tea"  # Github Link
-        print(" ")
-        print(f'{YELLOW}Apt Updater CLI UI by Dylan Rose{RESET}')
-        print(f"\033]8;;{url}\a{BLUE}Find me on Github{RESET}\033]8;;\a")
-        print(" ")
+        print(f"\n{COLORS['YELLOW']}Apt Updater CLI UI by Dylan Rose{COLORS['RESET']}")
+        print(f"\033]8;;{url}\a{COLORS['BLUE']}Find me on GitHub{COLORS['RESET']}\033]8;;\a\n")
+
         display_menu()
+
         try:
-            print(" ")
-            choice = int(input("Enter your choice (1-5): "))
+            choice = int(input("Enter choice (1–5): "))
+            if choice == 4:
+                print("Goodbye...")
+                sys.exit()
+
+            if choice == 5:
+                os.system("clear")
+                sys.exit()
+
             command = get_scan_options(choice)
             if command:
-                output = run_update(command)
-                print(output)
-        except ValueError:
-            print("Please enter a valid number from the options presented above.")
+                run_update(command)
+            else:
+                print("Invalid option selected.")
 
+        except ValueError:
+            print("Enter a number between 1–5")
+
+# ──────────────────────────────────────────────
 if __name__ == "__main__":
     main()
