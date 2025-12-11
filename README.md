@@ -18,7 +18,7 @@ Simple. Fast. No bloated UI — just the essentials.
 📦 Requirements
 - Python 3	✅
 - APT-based OS (Debian, Ubuntu, Raspberry Pi OS etc.)	✅
-- sudo privileges	⚠ Needed to run updates
+- sudo privileges	⚠ Needed to install updates
 
 
 🔧 Installation
@@ -29,6 +29,9 @@ Clone the repo:
 
 Run the script:
 python3 aptUpdater.py
+
+<img width="408" height="186" alt="image" src="https://github.com/user-attachments/assets/1439a5a1-6642-49b3-ba5e-97110074237b" />
+
 
 🖥 Usage Menu
 1. Update packages and sources
