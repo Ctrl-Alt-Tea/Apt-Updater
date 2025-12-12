@@ -5,6 +5,7 @@ A lightweight and colorful command-line interface for running common APT mainten
 Built by [Dylan Rose](https://roses.net.za/) & powered by Python.
 
 🚀 Features
+- ✔ Show system information
 - ✔ Update package lists
 - ✔ Upgrade installed packages
 - ✔ Remove unused dependencies
@@ -28,24 +29,30 @@ Clone the repo:
 
 
 Run the script:
+```
 python3 aptUpdater.py
+```
+or setup an alias in .bashrc
 
-<img width="408" height="186" alt="image" src="https://github.com/user-attachments/assets/1439a5a1-6642-49b3-ba5e-97110074237b" />
+
+<img width="587" height="503" alt="image" src="https://github.com/user-attachments/assets/2adf47d9-fc37-40b2-9fd4-190813486790" />
+
 
 
 🖥 Usage Menu
 1. Update packages and sources
 2. Upgrade packages
 3. Remove uneeded dependencies
-4. Exit
-5. Exit and clear terminal
+4. Preview upgrade (See what would change)
+5. Exit
+6. Exit and clear terminal
 
 
 
 ⚡ To-Do / Potential Future Addons
 - Add dist-upgrade option	🔥 Possible
 - Log updates to file	🚧 Maybe soon
-- Add progress bars	🧠 Thinking
+- ~~Add progress bars~~ (Added in V1.1.0)
 - Turn into pip-installable tool	👑 Would be awesome
 
 
