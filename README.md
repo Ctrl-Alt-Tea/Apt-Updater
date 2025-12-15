@@ -20,7 +20,7 @@ A powerful, colorful, and interactive command-line interface designed to streaml
 
 | Requirement | Status | Notes |
 | :--- | :--- | :--- |
-| **Python** | ✅ 3.8+ | Tested against Python 3.8, 3.9, 3.10, 3.11, 3.12. |
+| **Python** | ✅ 3.9+ | Tested against Python 3.9, 3.10, 3.11, 3.12. |
 | **Operating System** | ✅ | APT-based OS (Debian, Ubuntu, Raspberry Pi OS, etc.) |
 | **Privileges** | ⚠️ `sudo` | Required to execute update, upgrade, and autoremove commands. |
 
