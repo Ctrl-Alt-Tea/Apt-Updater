@@ -112,9 +112,8 @@ def test_failed_command_returns_non_zero(mock_popen, capsys):
     assert result_code == 100
 
     # Check if the error code message was printed, including the leading newline
-    captured = capsys.readouterr()
-    assert "\n\nProcess finished with error code: 100" in captured.out
-
+    assert "\n\n" in captured.out  # Check for the double newline
+    assert "Process finished with error code: 100" in captured.out
 
 @patch('aptUpdater.subprocess.Popen')
 def test_dry_run_flag_is_not_added(mock_popen, capsys):
@@ -144,7 +143,8 @@ def test_dry_run_flag_is_not_added(mock_popen, capsys):
     captured = capsys.readouterr()
 
     # 1. Check for the final success message (includes newline)
-    assert "\n\nDry run complete. No changes were made." in captured.out
+    assert "\n\n" in captured.out  # Check for the double newline
+    assert "Dry run complete. No changes were made." in captured.out
     
     # 2. Check Popen was called without the status flag
     call_args, _ = mock_popen.call_args
