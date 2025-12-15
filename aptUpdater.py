@@ -33,17 +33,24 @@ def draw_progress_bar(percent, message=""):
 # ──────────────────────────────────────────────
 # Helper: Print Summary
 # ──────────────────────────────────────────────
+
 def print_summary(updated_packages: list[str], command_name: str):
     """Prints a formatted summary of updated packages."""
-    if not updated_packages:
-        print(f"\n{COLORS['YELLOW']}No packages were installed or upgraded.{COLORS['RESET']}")
+    
+    # --- CRITICAL FIX: Check if the input is None ---
+    if updated_packages is None or not updated_packages:
+        print(f"\n{COLORS['YELLOW']}No packages were installed, upgraded, or removed.{COLORS['RESET']}")
         return
+    # --- End CRITICAL FIX ---
 
     print(f"\n{COLORS['GREEN']}✅ {command_name} Summary ({len(updated_packages)} Packages){COLORS['RESET']}")
     print("-" * 40)
     
+    # The rest of the function remains the same
     num_cols = 2
     items_per_col = (len(updated_packages) + num_cols - 1) // num_cols
+    
+    # ... (rest of summary printing logic) ...
     
     for i in range(items_per_col):
         line = ""
