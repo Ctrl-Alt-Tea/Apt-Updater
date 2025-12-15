@@ -115,42 +115,38 @@ def test_failed_command_returns_non_zero(mock_popen, capsys):
     assert "Process finished with error code:" in captured.out
     
 
-@patch('aptUpdater.subprocess.Popen')
+    @patch('aptUpdater.subprocess.Popen')
 def test_dry_run_flag_is_not_added(mock_popen, capsys):
     """
     Tests the dry run command (Option 5), ensuring:
     1. The progress flag is NOT added.
     2. The special "Dry run complete" message is printed.
     """
-    
+
     # Mock output lines for the dry-run simulation
     mock_stdout = [
         "The following packages would be upgraded:",
         "  package-A package-B",
     ]
-    
+
     # Set the mock to return a successful process
     mock_popen.return_value = mock_process(0, mock_stdout)
-    
+
     # Command for dry run (Option 5)
     command = get_scan_options(5)
-    
+
     # Execute the function, explicitly setting dry_run=True
     result_code = run_update(command, dry_run=True)
-    
-    # Assertions
-    assert result_code == 0
-    
-    # Check if Popen was called: The command should be ['sudo', 'apt-get', 'upgrade', '--dry-run']
-    call_args, _ = mock_popen.call_args
-    command_used = call_args[0]
-    
-    # Assert the progress flag is NOT in the command list
-    assert '-o' not in command_used
-    
-    # Assert the specific dry run message was printed
-    captured = capsys.readouterr()
-    assert "Dry run complete. No changes were made." in captured.out
 
-    # Now assert the result code (it should be 0 if the dry run message printed)
+    # Assertions
+    captured = capsys.readouterr()
+    
+    # 1. Check for the final success message
+    assert "Dry run complete. No changes were made." in captured.out
+    
+    # 2. Check Popen was called without the status flag
+    call_args, _ = mock_popen.call_args
+    assert '-o' not in call_args[0]
+    
+    # 3. Assert the result code is 0
     assert result_code == 0

@@ -139,11 +139,13 @@ def run_update(command: list[str], dry_run: bool = False, is_search: bool = Fals
         # Final actions after process completes
         if is_upgrading:
             draw_progress_bar(100.0, "Complete")
-            print()
-
+            print() # Prints a newline
+            sys.stdout.flush() # <--- CRITICAL: Force flush the progress bar output
+        
         # Report Success/Failure and Run Summary
         if process.returncode != 0:
             print(f"\n{COLORS['ORANGE']}Process finished with error code: {process.returncode}{COLORS['RESET']}")
+            sys.stdout.flush() # <--- CRITICAL: Force flush the error message
         else:
             if dry_run:
                 print(f"\n{COLORS['GREEN']}Dry run complete. No changes were made.{COLORS['RESET']}")
