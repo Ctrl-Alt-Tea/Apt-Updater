@@ -161,7 +161,7 @@ def run_update(command: list[str], dry_run: bool = False, is_search: bool = Fals
     except Exception as e:
         # Fallback for unexpected Python errors (not process errors)
         if 'process' in locals() and process.returncode is not None:
-        return process.returncode
+            return process.returncode
     
         print(f"\n{COLORS['ORANGE']}Unexpected error:{COLORS['RESET']} {e}")
         return 1
