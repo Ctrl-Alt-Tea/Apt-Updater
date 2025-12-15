@@ -1,0 +1,5 @@
+# requirements.txt
+
+# This project uses only modules from the Python Standard Library 
+# (subprocess, os, sys, re). 
+# No external packages are required for installation via pip.
