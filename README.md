@@ -1,3 +1,5 @@
+[![Python package](https://github.com/Ctrl-Alt-Tea/Apt-Updater/actions/workflows/python-package.yml/badge.svg?branch=main)](https://github.com/Ctrl-Alt-Tea/Apt-Updater/actions/workflows/python-package.yml)
+
 Apt Updater CLI UI
 
 A lightweight and colorful command-line interface for running common APT maintenance commands on Debian-based Linux systems (including Raspberry Pi OS).
