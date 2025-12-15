@@ -25,7 +25,7 @@ def mock_process(returncode, stdout_lines, stderr_output=""):
     
     # MOCK FIX: Simplifies poll() to indicate running (None) until the readline list is empty, 
     # then returns the final returncode (e.g., 0 or 100).
-    side_effects = [None] * len(stdout_lines) 
+    side_effects = [None] * (len(stdout_lines) + 1) 
     mock_proc.poll.side_effect = side_effects + [returncode]
     
     return mock_proc

@@ -158,14 +158,13 @@ def run_update(command: list[str], dry_run: bool = False, is_search: bool = Fals
         
         # --- CRITICAL FIX: Return the ACTUAL process return code ---
         return process.returncode
-
-    except KeyboardInterrupt:
-        print(f"\n{COLORS['ORANGE']}Process cancelled by user.{COLORS['RESET']}")
-        return 1
-    except Exception as e:
-        # Fallback for unexpected Python errors (not process errors)
-        print(f"\n{COLORS['ORANGE']}Unexpected error:{COLORS['RESET']} {e}")
-        return 1
+except KeyboardInterrupt:
+    # ...
+    return 1
+except Exception as e:
+    # If the exception is caught, it returns 1, which causes the failure.
+    print(f"\n{COLORS['ORANGE']}Unexpected error:{COLORS['RESET']} {e}")
+    return 1
 
 # ──────────────────────────────────────────────
 # System Information (Displays automatically)
