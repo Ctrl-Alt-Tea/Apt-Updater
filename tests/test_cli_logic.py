@@ -9,6 +9,8 @@ from aptUpdater import run_update, get_scan_options
 # SETUP MOCKS & HELPERS
 # ----------------------------------------------------------------------
 
+# tests/test_cli_logic.py
+
 def mock_process(returncode, stdout_lines, stderr_output=""):
     """Creates a mock subprocess object that simulates a running process."""
     mock_proc = MagicMock()
@@ -18,13 +20,13 @@ def mock_process(returncode, stdout_lines, stderr_output=""):
     mock_proc.stdout.readline.side_effect = stdout_lines + [""]
     mock_proc.stdout.read.return_value = "".join(stdout_lines)
     
-    # Mock the stderr stream
-    mock_proc.stderr.read.return_value = stderr_output
-    
-    # Mock the poll() method to indicate process is done after lines are read
-    # We add enough 'None' calls to cover all readline calls, then the final returncode
-    mock_proc.poll.side_effect = [None] * (len(stdout_lines) + 1) + [returncode]
+    # Mock the wait() method (often necessary for cleanup)
     mock_proc.wait.return_value = None
+    
+    # MOCK FIX: Simplifies poll() to indicate running (None) until the readline list is empty, 
+    # then returns the final returncode (e.g., 0 or 100).
+    side_effects = [None] * len(stdout_lines) 
+    mock_proc.poll.side_effect = side_effects + [returncode]
     
     return mock_proc
 

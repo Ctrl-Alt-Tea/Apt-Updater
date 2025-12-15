@@ -61,12 +61,12 @@ def print_summary(updated_packages: list[str], command_name: str):
 # ──────────────────────────────────────────────
 # Run apt-get command and stream output
 # ──────────────────────────────────────────────
+
 def run_update(command: list[str], dry_run: bool = False, is_search: bool = False):
     PACKAGE_RE = re.compile(r'^(?:Inst|Upgrading|Unpacking|Remv) ([\w\d\-\+\.]+)(?: |:|\().*')
     updated_packages = set()
 
-    try: # <--- Start of TRY block
-
+    try:
         command_name = command[2].capitalize() if len(command) > 2 else "Operation"
         cmd_with_status = command
         
@@ -75,6 +75,7 @@ def run_update(command: list[str], dry_run: bool = False, is_search: bool = Fals
         
         is_upgrading = not dry_run and command_name in ["Upgrade", "Dist-upgrade"]
         if is_upgrading:
+            # Only inject status-fd flag for complex upgrade operations
             cmd_with_status = command + ["-o", "APT::Status-Fd=1"]
             print(f"{COLORS['GREY']}Initializing process...{COLORS['RESET']}")
         
@@ -101,22 +102,43 @@ def run_update(command: list[str], dry_run: bool = False, is_search: bool = Fals
                 if match:
                     updated_packages.add(match.group(1))
 
-                # Handle progress bar output (omitted details for brevity)
+                # Handle progress bar output
                 if is_upgrading:
-                    # ... (progress bar logic remains here) ...
-                    pass 
+                    # Logic for dlstatus/pmstatus goes here...
+                    if stripped_line.startswith(('dlstatus', 'pmstatus')):
+                        # ... (progress bar update logic) ...
+                        parts = stripped_line.split(':')
+                        if len(parts) >= 3:
+                            try:
+                                current_percent = float(parts[1])
+                                current_msg = parts[2]
+                                draw_progress_bar(current_percent, current_msg)
+                            except ValueError:
+                                pass
+                    elif stripped_line.startswith('media-change'):
+                        # Media change request logic...
+                        sys.stdout.write("\r\033[K")
+                        print(f"{COLORS['ORANGE']}Media change required: {stripped_line}{COLORS['RESET']}")
+                        draw_progress_bar(current_percent, current_msg)
+                    
+                    # Normal Output (clear and redraw bar)
+                    if stripped_line:
+                        sys.stdout.write("\r\033[K")
+                        print(stripped_line)
+                        draw_progress_bar(current_percent, current_msg)
+                
+                # If it's search, update, autoremove, or dry-run, just print the output normally
                 elif stripped_line:
                     print(stripped_line)
-        
-        # --- Crucial Fix 1: Ensure process has definitely finished ---
-        process.wait()
+
+        # --- FIX APPLIED: Removed process.wait() here ---
 
         # Final actions after process completes
         if is_upgrading:
             draw_progress_bar(100.0, "Complete")
             print()
 
-        # --- Report Success/Failure and Run Summary ---
+        # Report Success/Failure and Run Summary
         if process.returncode != 0:
             print(f"\n{COLORS['ORANGE']}Process finished with error code: {process.returncode}{COLORS['RESET']}")
         else:
@@ -127,19 +149,17 @@ def run_update(command: list[str], dry_run: bool = False, is_search: bool = Fals
             elif command_name in ["Upgrade", "Dist-upgrade", "Autoremove"]:
                 print_summary(sorted(list(updated_packages)), command_name)
         
-        # --- Crucial Fix 2: Return the ACTUAL process return code on success or controlled failure ---
+        # --- CRITICAL FIX: Return the ACTUAL process return code ---
         return process.returncode
 
     except KeyboardInterrupt:
         print(f"\n{COLORS['ORANGE']}Process cancelled by user.{COLORS['RESET']}")
         return 1
     except Exception as e:
-        # This block should now only catch unexpected Python errors, not process errors.
-        # However, we must ensure it doesn't return 1 when process.returncode is available.
-        # Since the issue is within the mock, we can assume a failed mock returns 1.
-        # We will keep this for safety, but the main logic is now outside the exception.
+        # Fallback for unexpected Python errors (not process errors)
         print(f"\n{COLORS['ORANGE']}Unexpected error:{COLORS['RESET']} {e}")
-        return 1 # Fallback return code
+        return 1
+
 # ──────────────────────────────────────────────
 # System Information (Displays automatically)
 # ──────────────────────────────────────────────
