@@ -11,21 +11,29 @@ from aptUpdater import run_update, get_scan_options
 
 # tests/test_cli_logic.py
 
+# In tests/test_cli_logic.py
+
 def mock_process(returncode, stdout_lines, stderr_output=""):
     """Creates a mock subprocess object that simulates a running process."""
     mock_proc = MagicMock()
     mock_proc.returncode = returncode
+
+    # CRITICAL: This ensures the stream is properly closed after all lines are read
+    mock_stdout = MagicMock()
+    mock_stdout.readline.side_effect = stdout_lines + [""]
     
-    # Mock the stdout stream to return lines one by one until empty
-    mock_proc.stdout.readline.side_effect = stdout_lines + [""]
+    # After the last line is read, subsequent attempts to read should raise an error
+    # or return an empty string, which the mock handles by stopping.
+    mock_proc.stdout = mock_stdout
     mock_proc.stdout.read.return_value = "".join(stdout_lines)
     
-    # Mock the wait() method (often necessary for cleanup)
+    # Mock the wait() method 
     mock_proc.wait.return_value = None
-    
-    # MOCK FIX: Simplifies poll() to indicate running (None) until the readline list is empty, 
-    # then returns the final returncode (e.g., 0 or 100).
-    side_effects = [None] * (len(stdout_lines) + 1) 
+
+    # This poll sequence aligns with the loop structure:
+    # None for each line, then None for the check after the last line is read, 
+    # then the final code for the break condition.
+    side_effects = [None] * (len(stdout_lines) + 1)
     mock_proc.poll.side_effect = side_effects + [returncode]
     
     return mock_proc

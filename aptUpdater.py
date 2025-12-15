@@ -31,26 +31,21 @@ def draw_progress_bar(percent, message=""):
     sys.stdout.flush()
 
 # ──────────────────────────────────────────────
-# Helper: Print Summary
+# Helper: Print Summary (REQUIRED FIX)
 # ──────────────────────────────────────────────
-
-def print_summary(updated_packages: list[str], command_name: str):
+def print_summary(updated_packages: set[str], command_name: str):
     """Prints a formatted summary of updated packages."""
     
-    # --- CRITICAL FIX: Check if the input is None ---
+    # CRITICAL FIX: Ensure updated_packages is not None before proceeding
     if updated_packages is None or not updated_packages:
         print(f"\n{COLORS['YELLOW']}No packages were installed, upgraded, or removed.{COLORS['RESET']}")
         return
-    # --- End CRITICAL FIX ---
 
     print(f"\n{COLORS['GREEN']}✅ {command_name} Summary ({len(updated_packages)} Packages){COLORS['RESET']}")
     print("-" * 40)
     
-    # The rest of the function remains the same
     num_cols = 2
     items_per_col = (len(updated_packages) + num_cols - 1) // num_cols
-    
-    # ... (rest of summary printing logic) ...
     
     for i in range(items_per_col):
         line = ""
@@ -66,9 +61,8 @@ def print_summary(updated_packages: list[str], command_name: str):
 
 
 # ──────────────────────────────────────────────
-# Run apt-get command and stream output
+# Run apt-get command and stream output (REQUIRED FIXES)
 # ──────────────────────────────────────────────
-
 def run_update(command: list[str], dry_run: bool = False, is_search: bool = False):
     PACKAGE_RE = re.compile(r'^(?:Inst|Upgrading|Unpacking|Remv) ([\w\d\-\+\.]+)(?: |:|\().*')
     updated_packages = set()
@@ -138,7 +132,9 @@ def run_update(command: list[str], dry_run: bool = False, is_search: bool = Fals
                 elif stripped_line:
                     print(stripped_line)
 
-        # --- FIX APPLIED: Removed process.wait() here ---
+        # --- CRITICAL FIX: Explicitly close the pipe to prevent mock cleanup errors ---
+        process.stdout.close()
+
 
         # Final actions after process completes
         if is_upgrading:
@@ -156,12 +152,14 @@ def run_update(command: list[str], dry_run: bool = False, is_search: bool = Fals
             elif command_name in ["Upgrade", "Dist-upgrade", "Autoremove"]:
                 print_summary(sorted(list(updated_packages)), command_name)
         
-        # --- CRITICAL FIX: Return the ACTUAL process return code ---
+        # --- Return the ACTUAL process return code ---
         return process.returncode
+        
     except KeyboardInterrupt:
         print(f"\n{COLORS['ORANGE']}Process cancelled by user.{COLORS['RESET']}")
         return 1
     except Exception as e:
+        # Fallback for unexpected Python errors (not process errors)
         print(f"\n{COLORS['ORANGE']}Unexpected error:{COLORS['RESET']} {e}")
         return 1
 # ──────────────────────────────────────────────
