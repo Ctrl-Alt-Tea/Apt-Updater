@@ -124,7 +124,7 @@ def run_update(command: list[str], dry_run: bool = False, is_search: bool = Fals
                     
                     # Normal Output (clear and redraw bar)
                     if stripped_line:
-                        sys.stdout.write("\r\033[K")
+                        #sys.stdout.write("\r\033[K")
                         print(stripped_line)
                         draw_progress_bar(current_percent, current_msg)
                 
