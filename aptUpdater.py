@@ -37,8 +37,10 @@ def print_summary(updated_packages: set[str], command_name: str):
     """Prints a formatted summary of updated packages."""
     
     # CRITICAL FIX: Ensure updated_packages is not None before proceeding
+    # Note: We enforce a sorted list for consistent display in the upgrade path.
     if updated_packages is None or not updated_packages:
         print(f"\n{COLORS['YELLOW']}No packages were installed, upgraded, or removed.{COLORS['RESET']}")
+        sys.stdout.flush()
         return
 
     print(f"\n{COLORS['GREEN']}✅ {command_name} Summary ({len(updated_packages)} Packages){COLORS['RESET']}")
@@ -47,6 +49,7 @@ def print_summary(updated_packages: set[str], command_name: str):
     num_cols = 2
     items_per_col = (len(updated_packages) + num_cols - 1) // num_cols
     
+    # Note: updated_packages is expected to be a sorted list here
     for i in range(items_per_col):
         line = ""
         for j in range(num_cols):
@@ -58,6 +61,7 @@ def print_summary(updated_packages: set[str], command_name: str):
                 line += " " * 20
         print(line)
     print("-" * 40)
+    sys.stdout.flush()
 
 
 # ──────────────────────────────────────────────
@@ -72,7 +76,8 @@ def run_update(command: list[str], dry_run: bool = False, is_search: bool = Fals
         cmd_with_status = command
         
         if is_search:
-            print(f"\n{COLORS['CYAN']}Searching for packages matching '{command[-1]}'...{COLORS['RESET']}")
+            # Note: The main loop prints the "Searching for..." message
+            pass 
         
         is_upgrading = not dry_run and command_name in ["Upgrade", "Dist-upgrade"]
         if is_upgrading:
@@ -124,7 +129,7 @@ def run_update(command: list[str], dry_run: bool = False, is_search: bool = Fals
                     
                     # Normal Output (clear and redraw bar)
                     if stripped_line:
-                        #sys.stdout.write("\r\033[K")
+                        #sys.stdout.write("\r\033[K") # Removed line clearing for stability in testing
                         print(stripped_line)
                         draw_progress_bar(current_percent, current_msg)
                 
@@ -140,17 +145,20 @@ def run_update(command: list[str], dry_run: bool = False, is_search: bool = Fals
         if is_upgrading:
             draw_progress_bar(100.0, "Complete")
             print() # Prints a newline
-            sys.stdout.flush() # <--- CRITICAL: Force flush the progress bar output
+            sys.stdout.flush() # CRITICAL: Force flush the progress bar output
         
         # Report Success/Failure and Run Summary
         if process.returncode != 0:
             print(f"\n{COLORS['ORANGE']}Process finished with error code: {process.returncode}{COLORS['RESET']}")
-            sys.stdout.flush() # <--- CRITICAL: Force flush the error message
+            sys.stdout.flush() # CRITICAL: Force flush the error message
         else:
             if dry_run:
                 print(f"\n{COLORS['GREEN']}Dry run complete. No changes were made.{COLORS['RESET']}")
+                sys.stdout.flush()
             elif is_search:
                  print(f"{COLORS['GREEN']}Search complete.{COLORS['RESET']}")
+                 sys.stdout.flush()
+            # CRITICAL FIX: Only call print_summary if it's NOT a dry run and NOT a search
             elif command_name in ["Upgrade", "Dist-upgrade", "Autoremove"]:
                 print_summary(sorted(list(updated_packages)), command_name)
         
@@ -164,9 +172,10 @@ def run_update(command: list[str], dry_run: bool = False, is_search: bool = Fals
         # Fallback for unexpected Python errors (not process errors)
         if 'process' in locals() and process.returncode is not None:
             return process.returncode
-    
+        
         print(f"\n{COLORS['ORANGE']}Unexpected error:{COLORS['RESET']} {e}")
         return 1
+
 # ──────────────────────────────────────────────
 # System Information (Displays automatically)
 # ──────────────────────────────────────────────
@@ -227,8 +236,9 @@ def display_menu():
     print("2. Upgrade installed packages")
     print("3. Remove unused dependencies")
     print(f"{COLORS['YELLOW']}4. Preview upgrade (Dry Run)")
-    print(f"{COLORS['GREY']}5. Exit")
-    print(f"{COLORS['ORANGE']}6. Exit and clear terminal{COLORS['RESET']}")
+    print(f"{COLORS['CYAN']}5. Search for a package (apt-cache search)") # NEW OPTION
+    print(f"{COLORS['GREY']}6. Exit") # SHIFTED
+    print(f"{COLORS['ORANGE']}7. Exit and clear terminal{COLORS['RESET']}") # SHIFTED
 
 
 def get_scan_options(choice: int):
@@ -237,8 +247,9 @@ def get_scan_options(choice: int):
         2: ["sudo", "apt-get", "upgrade", "-y"],
         3: ["sudo", "apt-get", "autoremove", "-y"],
         4: ["sudo", "apt-get", "upgrade", "--dry-run"],
-        5: None,
+        5: ["sudo", "apt-cache", "search"], # NEW SEARCH COMMAND
         6: None,
+        7: None,
     }.get(choice)
 
 # ──────────────────────────────────────────────
@@ -246,7 +257,7 @@ def get_scan_options(choice: int):
 # ──────────────────────────────────────────────
 def main():
     url = "https://github.com/Ctrl-Alt-Tea"
-    MAX_CHOICE = 6 # Max choice is now 6
+    MAX_CHOICE = 7 # Max choice is now 7
 
     while True:
         # Display Welcome Banner
@@ -265,21 +276,32 @@ def main():
             
             choice = int(choice_input)
             
-            if choice == 5:
+            if choice == 6:
                 print("Goodbye...")
                 sys.exit()
 
-            if choice == 6:
+            if choice == 7:
                 os.system("clear")
                 sys.exit()
 
             command = get_scan_options(choice)
             is_dry_run = (choice == 4)
+            is_search = (choice == 5) # New flag for search
 
+            # Handle search input
+            if is_search:
+                search_term = input(f"{COLORS['CYAN']}Enter package name to search: {COLORS['RESET']}")
+                if search_term:
+                    command.append(search_term)
+                else:
+                    print(f"{COLORS['ORANGE']}Search term cannot be empty.{COLORS['RESET']}")
+                    continue
+            
             if command:
-                run_update(command, dry_run=is_dry_run)
+                # Pass both flags to run_update
+                run_update(command, dry_run=is_dry_run, is_search=is_search)
             else:
-                if choice not in [5, 6]:
+                if choice not in [6, 7]:
                     print("Invalid option selected.")
 
         except ValueError:
