@@ -1,5 +1,6 @@
 import pytest
 from unittest.mock import patch, MagicMock
+# Assuming aptUpdater.py is in the same directory or accessible
 from aptUpdater import run_update, get_scan_options
 
 # ──────────────────────────────────────────────
@@ -82,7 +83,7 @@ def test_successful_upgrade_captures_packages_and_progress(mock_popen, capsys):
     captured = capsys.readouterr()
     assert "package-A" in captured.out
     assert "package-B" in captured.out
-    # Check for the key part of the summary message
+    # Stable assertion, checking for the summary title content
     assert "Upgrade Summary" in captured.out
 
 
@@ -111,9 +112,13 @@ def test_failed_command_returns_non_zero(mock_popen, capsys):
     # Assertions
     assert result_code == 100
 
-    # Check if the error code message was printed, including the leading newline
-    assert "\n\n" in captured.out  # Check for the double newline
+    # Read output once
+    captured = capsys.readouterr()
+    
+    # Check if the error code message was printed. Split assertion to ignore color codes
+    assert "\n\n" in captured.out
     assert "Process finished with error code: 100" in captured.out
+
 
 @patch('aptUpdater.subprocess.Popen')
 def test_dry_run_flag_is_not_added(mock_popen, capsys):
@@ -133,7 +138,7 @@ def test_dry_run_flag_is_not_added(mock_popen, capsys):
     # Set the mock to return a successful process
     mock_popen.return_value = mock_process(0, mock_stdout)
 
-    # Command for dry run (Option 4, previously Option 5)
+    # Command for dry run (Option 4)
     command = get_scan_options(4)
 
     # Execute the function, explicitly setting dry_run=True
@@ -142,8 +147,8 @@ def test_dry_run_flag_is_not_added(mock_popen, capsys):
     # Assertions
     captured = capsys.readouterr()
 
-    # 1. Check for the final success message (includes newline)
-    assert "\n\n" in captured.out  # Check for the double newline
+    # 1. Check for the final success message. Split assertion to ignore color codes
+    assert "\n\n" in captured.out
     assert "Dry run complete. No changes were made." in captured.out
     
     # 2. Check Popen was called without the status flag
