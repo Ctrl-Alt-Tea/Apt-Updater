@@ -36,8 +36,7 @@ def draw_progress_bar(percent, message=""):
 def print_summary(updated_packages: set[str], command_name: str):
     """Prints a formatted summary of updated packages."""
     
-    # CRITICAL FIX: Ensure updated_packages is not None before proceeding
-    # Note: We enforce a sorted list for consistent display in the upgrade path.
+    # Ensure updated_packages is not None before proceeding
     if updated_packages is None or not updated_packages:
         print(f"\n{COLORS['YELLOW']}No packages were installed, upgraded, or removed.{COLORS['RESET']}")
         sys.stdout.flush()
@@ -47,15 +46,16 @@ def print_summary(updated_packages: set[str], command_name: str):
     print("-" * 40)
     
     num_cols = 2
-    items_per_col = (len(updated_packages) + num_cols - 1) // num_cols
+    # Ensure we operate on a list for reliable indexing
+    package_list = sorted(list(updated_packages)) 
+    items_per_col = (len(package_list) + num_cols - 1) // num_cols
     
-    # Note: updated_packages is expected to be a sorted list here
     for i in range(items_per_col):
         line = ""
         for j in range(num_cols):
             index = i + j * items_per_col
-            if index < len(updated_packages):
-                package = updated_packages[index]
+            if index < len(package_list):
+                package = package_list[index]
                 line += f"{COLORS['PURPLE']}{package:<20}{COLORS['RESET']}"
             else:
                 line += " " * 20
@@ -74,10 +74,6 @@ def run_update(command: list[str], dry_run: bool = False, is_search: bool = Fals
     try:
         command_name = command[2].capitalize() if len(command) > 2 else "Operation"
         cmd_with_status = command
-        
-        if is_search:
-            # Note: The main loop prints the "Searching for..." message
-            pass 
         
         is_upgrading = not dry_run and command_name in ["Upgrade", "Dist-upgrade"]
         if is_upgrading:
@@ -110,9 +106,11 @@ def run_update(command: list[str], dry_run: bool = False, is_search: bool = Fals
 
                 # Handle progress bar output
                 if is_upgrading:
-                    # Logic for dlstatus/pmstatus goes here...
+                    
+                    is_status_line = False
+                    
                     if stripped_line.startswith(('dlstatus', 'pmstatus')):
-                        # ... (progress bar update logic) ...
+                        is_status_line = True
                         parts = stripped_line.split(':')
                         if len(parts) >= 3:
                             try:
@@ -122,22 +120,23 @@ def run_update(command: list[str], dry_run: bool = False, is_search: bool = Fals
                             except ValueError:
                                 pass
                     elif stripped_line.startswith('media-change'):
+                        is_status_line = True
                         # Media change request logic...
                         sys.stdout.write("\r\033[K")
                         print(f"{COLORS['ORANGE']}Media change required: {stripped_line}{COLORS['RESET']}")
                         draw_progress_bar(current_percent, current_msg)
                     
-                    # Normal Output (clear and redraw bar)
-                    if stripped_line:
-                        #sys.stdout.write("\r\033[K") # Removed line clearing for stability in testing
-                        print(stripped_line)
-                        draw_progress_bar(current_percent, current_msg)
+                    # Normal Output: Only print lines that are NOT status lines
+                    if stripped_line and not is_status_line:
+                        sys.stdout.write("\r\033[K") # Clear the progress bar line
+                        print(stripped_line)        # Print the normal output
+                        draw_progress_bar(current_percent, current_msg) # Redraw bar below
                 
                 # If it's search, update, autoremove, or dry-run, just print the output normally
                 elif stripped_line:
                     print(stripped_line)
 
-        # --- CRITICAL FIX: Explicitly close the pipe to prevent mock cleanup errors ---
+        # --- Explicitly close the pipe ---
         process.stdout.close()
 
 
@@ -145,12 +144,12 @@ def run_update(command: list[str], dry_run: bool = False, is_search: bool = Fals
         if is_upgrading:
             draw_progress_bar(100.0, "Complete")
             print() # Prints a newline
-            sys.stdout.flush() # CRITICAL: Force flush the progress bar output
+            sys.stdout.flush() # Force flush the progress bar output
         
         # Report Success/Failure and Run Summary
         if process.returncode != 0:
             print(f"\n{COLORS['ORANGE']}Process finished with error code: {process.returncode}{COLORS['RESET']}")
-            sys.stdout.flush() # CRITICAL: Force flush the error message
+            sys.stdout.flush()
         else:
             if dry_run:
                 print(f"\n{COLORS['GREEN']}Dry run complete. No changes were made.{COLORS['RESET']}")
@@ -158,9 +157,9 @@ def run_update(command: list[str], dry_run: bool = False, is_search: bool = Fals
             elif is_search:
                  print(f"{COLORS['GREEN']}Search complete.{COLORS['RESET']}")
                  sys.stdout.flush()
-            # CRITICAL FIX: Only call print_summary if it's NOT a dry run and NOT a search
+            # Only call print_summary if it's a non-dry-run, non-search operation
             elif command_name in ["Upgrade", "Dist-upgrade", "Autoremove"]:
-                print_summary(sorted(list(updated_packages)), command_name)
+                print_summary(updated_packages, command_name)
         
         # --- Return the ACTUAL process return code ---
         return process.returncode
@@ -236,9 +235,9 @@ def display_menu():
     print("2. Upgrade installed packages")
     print("3. Remove unused dependencies")
     print(f"{COLORS['YELLOW']}4. Preview upgrade (Dry Run)")
-    print(f"{COLORS['CYAN']}5. Search for a package (apt-cache search)") # NEW OPTION
-    print(f"{COLORS['GREY']}6. Exit") # SHIFTED
-    print(f"{COLORS['ORANGE']}7. Exit and clear terminal{COLORS['RESET']}") # SHIFTED
+    print(f"{COLORS['CYAN']}5. Search for a package (apt-cache search)")
+    print(f"{COLORS['GREY']}6. Exit")
+    print(f"{COLORS['ORANGE']}7. Exit and clear terminal{COLORS['RESET']}")
 
 
 def get_scan_options(choice: int):
@@ -247,7 +246,7 @@ def get_scan_options(choice: int):
         2: ["sudo", "apt-get", "upgrade", "-y"],
         3: ["sudo", "apt-get", "autoremove", "-y"],
         4: ["sudo", "apt-get", "upgrade", "--dry-run"],
-        5: ["sudo", "apt-cache", "search"], # NEW SEARCH COMMAND
+        5: ["sudo", "apt-cache", "search"],
         6: None,
         7: None,
     }.get(choice)
@@ -257,7 +256,7 @@ def get_scan_options(choice: int):
 # ──────────────────────────────────────────────
 def main():
     url = "https://github.com/Ctrl-Alt-Tea"
-    MAX_CHOICE = 7 # Max choice is now 7
+    MAX_CHOICE = 7
 
     while True:
         # Display Welcome Banner
@@ -286,7 +285,7 @@ def main():
 
             command = get_scan_options(choice)
             is_dry_run = (choice == 4)
-            is_search = (choice == 5) # New flag for search
+            is_search = (choice == 5)
 
             # Handle search input
             if is_search:
