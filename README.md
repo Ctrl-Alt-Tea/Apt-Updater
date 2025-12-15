@@ -30,7 +30,7 @@ Follow these steps to quickly clone and run the utility:
 
 1.  **Clone the repository:**
     ```bash
-    git clone [https://github.com/Ctrl-Alt-Tea/Apt-Updater.git](https://github.com/Ctrl-Alt-Tea/Apt-Updater.git)
+    git clone https://github.com/Ctrl-Alt-Tea/Apt-Updater.git
     ```
 2.  **Navigate to the directory:**
     ```bash
