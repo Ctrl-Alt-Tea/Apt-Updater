@@ -116,7 +116,7 @@ def test_failed_command_returns_non_zero(mock_popen, capsys):
     
 
     @patch('aptUpdater.subprocess.Popen')
-def test_dry_run_flag_is_not_added(mock_popen, capsys):
+    def test_dry_run_flag_is_not_added(mock_popen, capsys):
     """
     Tests the dry run command (Option 5), ensuring:
     1. The progress flag is NOT added.
