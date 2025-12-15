@@ -31,7 +31,7 @@ def draw_progress_bar(percent, message=""):
     sys.stdout.flush()
 
 # ──────────────────────────────────────────────
-# Helper: Print Summary (REQUIRED FIX)
+# Helper: Print Summary
 # ──────────────────────────────────────────────
 def print_summary(updated_packages: set[str], command_name: str):
     """Prints a formatted summary of updated packages."""
@@ -61,7 +61,7 @@ def print_summary(updated_packages: set[str], command_name: str):
 
 
 # ──────────────────────────────────────────────
-# Run apt-get command and stream output (REQUIRED FIXES)
+# Run apt-get command and stream output 
 # ──────────────────────────────────────────────
 def run_update(command: list[str], dry_run: bool = False, is_search: bool = False):
     PACKAGE_RE = re.compile(r'^(?:Inst|Upgrading|Unpacking|Remv) ([\w\d\-\+\.]+)(?: |:|\().*')
@@ -160,6 +160,9 @@ def run_update(command: list[str], dry_run: bool = False, is_search: bool = Fals
         return 1
     except Exception as e:
         # Fallback for unexpected Python errors (not process errors)
+        if 'process' in locals() and process.returncode is not None:
+        return process.returncode
+    
         print(f"\n{COLORS['ORANGE']}Unexpected error:{COLORS['RESET']} {e}")
         return 1
 # ──────────────────────────────────────────────
