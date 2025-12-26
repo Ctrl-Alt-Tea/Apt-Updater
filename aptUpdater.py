@@ -233,22 +233,24 @@ def display_menu():
     print("Select an APT option below:")
     print(f"{COLORS['GREEN']}1. Update package lists")
     print("2. Upgrade installed packages")
-    print("3. Remove unused dependencies")
-    print(f"{COLORS['YELLOW']}4. Preview upgrade (Dry Run)")
-    print(f"{COLORS['CYAN']}5. Search for a package (apt-cache search)")
-    print(f"{COLORS['GREY']}6. Exit")
-    print(f"{COLORS['ORANGE']}7. Exit and clear terminal{COLORS['RESET']}")
+    print("3. Distro/System Upgrade")
+    print("4. Remove unused dependencies")
+    print(f"{COLORS['YELLOW']}5. Preview upgrade (Dry Run)")
+    print(f"{COLORS['CYAN']}6. Search for a package (apt-cache search)")
+    print(f"{COLORS['GREY']}7. Exit")
+    print(f"{COLORS['ORANGE']}8. Exit and clear terminal{COLORS['RESET']}")
 
 
 def get_scan_options(choice: int):
     return {
         1: ["sudo", "apt-get", "update", "-y"],
         2: ["sudo", "apt-get", "upgrade", "-y"],
-        3: ["sudo", "apt-get", "autoremove", "-y"],
-        4: ["sudo", "apt-get", "upgrade", "--dry-run"],
-        5: ["sudo", "apt-cache", "search"],
-        6: None,
+        3: ["sudo", "apt-get", "dist-upgrade", "-y"], #Dist upgrade
+        4: ["sudo", "apt-get", "autoremove", "-y"],
+        5: ["sudo", "apt-get", "upgrade", "--dry-run"],
+        6: ["sudo", "apt-cache", "search"],
         7: None,
+        8: None,
     }.get(choice)
 
 # ──────────────────────────────────────────────
@@ -275,17 +277,17 @@ def main():
             
             choice = int(choice_input)
             
-            if choice == 6:
+            if choice == 7:
                 print("Goodbye...")
                 sys.exit()
 
-            if choice == 7:
+            if choice == 8:
                 os.system("clear")
                 sys.exit()
 
             command = get_scan_options(choice)
-            is_dry_run = (choice == 4)
-            is_search = (choice == 5)
+            is_dry_run = (choice == 5)
+            is_search = (choice == 6)
 
             # Handle search input
             if is_search:
