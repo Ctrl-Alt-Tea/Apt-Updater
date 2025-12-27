@@ -262,8 +262,7 @@ def main():
 
     while True:
         # Display Welcome Banner
-        print(f"\n{COLORS['YELLOW']}Apt Updater CLI UI by Dylan Rose{COLORS['RESET']}")
-        print(f"\033]8;;{url}\a{COLORS['BLUE']}Find me on GitHub{COLORS['RESET']}\033]8;;\a")
+        print(f"\033]8;;{url}\a{COLORS['BLUE']}Follow this dev on GitHub{COLORS['RESET']}\033]8;;\a")
 
         # Automatically display System Info on launch
         display_system_info() 
@@ -278,7 +277,10 @@ def main():
             choice = int(choice_input)
             
             if choice == 7:
-                print("Goodbye...")
+                print(" ")
+                print(f"\n{COLORS['YELLOW']}Goodbye and stay awesome ...{COLORS['RESET']}")
+                print(f"\033]8;;{url}\a{COLORS['BLUE']}Follow this dev on GitHub{COLORS['RESET']}\033]8;;\a")
+                print(" ")
                 sys.exit()
 
             if choice == 8:
