@@ -270,7 +270,7 @@ def main():
         display_menu()
 
         try:
-            choice_input = input(f"Enter choice (1–{MAX_CHOICE}): ")
+            choice_input = input(f"Enter choice (1–{MAX_CHOICE + 1}): ")
             if not choice_input.strip():
                 continue
             
@@ -308,7 +308,7 @@ def main():
                     print("Invalid option selected.")
 
         except ValueError:
-            print(f"Enter a number between 1–{MAX_CHOICE}")
+            print(f"Enter a number between 1–{MAX_CHOICE + 1}")
         except KeyboardInterrupt:
             print("\nGoodbye...")
             sys.exit()
