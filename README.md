@@ -60,7 +60,8 @@ The script displays a numbered menu. Enter the corresponding number to execute t
 | **7** | Exit | *(Exits normally)* |
 | **8** | Exit and clear terminal | *(Exits and clears screen)* |
 
-<img width="378" height="358" alt="A screenshot of the Apt Updater CLI UI running on a Linux terminal, showing the system information and the numbered menu options." src="https://github.com/user-attachments/assets/42c96d64-b5fd-407f-8c1c-013f6f6e4148" />
+
+<img width="350" height="365" alt="A screenshot of the Apt Updater CLI UI running on a Linux terminal, showing the system information and the numbered menu options." src="https://github.com/user-attachments/assets/765867d0-82d7-4cb6-8175-7145d9333cb9" />
 
 
 
