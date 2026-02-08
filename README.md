@@ -24,9 +24,9 @@ A powerful, colorful, and interactive command-line interface designed to streaml
 | **Operating System** | ✅ | APT-based OS (Debian, Ubuntu, Raspberry Pi OS, etc.) |
 | **Privileges** | ⚠️ `sudo` | Required to execute update, upgrade, and autoremove commands. |
 
-## 🔧 Installation
+## 🔧 Easy Installation
 
-Follow these steps to quickly clone and run the utility:
+Follow these steps to quickly clone and run the install utility:
 
 1.  **Clone the repository:**
     ```bash
@@ -38,12 +38,12 @@ Follow these steps to quickly clone and run the utility:
     ```
 3.  **Run the script:**
     ```bash
-    python3 aptUpdater.py
+    ./install.sh
     ```
 
-> 💡 **Tip 1:** To make the script executable directly and avoid typing `python3`, you can run `chmod +x aptUpdater.py` and then execute it via `./aptUpdater.py`.
-> 
-> 💡 **Tip 2:** By adding an alias you can run this using your preffered command such as "update"
+> 💡 **Tip:** This install script uses the Bash (default) terminal 
+
+
 
 ## 🖥️ Usage Menu
 
@@ -63,6 +63,26 @@ The script displays a numbered menu. Enter the corresponding number to execute t
 
 <img width="350" height="365" alt="A screenshot of the Apt Updater CLI UI running on a Linux terminal, showing the system information and the numbered menu options." src="https://github.com/user-attachments/assets/765867d0-82d7-4cb6-8175-7145d9333cb9" />
 
+## 🔧 Manual Installation
+
+Follow these steps to quickly clone and run the utility:
+
+1.  **Clone the repository:**
+    ```bash
+    git clone https://github.com/Ctrl-Alt-Tea/Apt-Updater.git
+    ```
+2.  **Navigate to the directory:**
+    ```bash
+    cd Apt-Updater
+    ```
+3.  **Run the script:**
+    ```bash
+    python3 aptUpdater.py
+    ```
+
+> 💡 **Tip 1:** To make the script executable directly and avoid typing `python3`, you can run `chmod +x aptUpdater.py` and then execute it via `./aptUpdater.py`.
+> 
+> 💡 **Tip 2:** By adding an alias you can run this using your preffered command such as "update"
 
 
 ## ⚡ Future Plans
