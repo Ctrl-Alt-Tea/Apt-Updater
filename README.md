@@ -36,10 +36,15 @@ Follow these steps to quickly clone and run the install utility:
     ```bash
     cd Apt-Updater
     ```
-3.  **Run the script:**
+3.  **Run the install script:**
     ```bash
     ./install.sh
     ```
+4.  **Start the update process using the below shortcut:**
+    ```bash
+    update
+    ```
+    
 
 > 💡 **Tip:** This install script uses the Bash (default) terminal 
 
